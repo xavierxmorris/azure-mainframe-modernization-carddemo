@@ -178,12 +178,3 @@ Treat them as sensitive-shaped data:
 - Use Entra ID and managed identities for future authenticated services.
 
 Report vulnerabilities according to [SECURITY.md](SECURITY.md).
-
-## Upstream and license
-
-This project is derived from
-[`aws-samples/aws-mainframe-modernization-carddemo`](https://github.com/aws-samples/aws-mainframe-modernization-carddemo)
-at commit `59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e`.
-Original copyright notices and the Apache License 2.0 are retained. Historical
-`AWS.M2` dataset names remain in legacy source and data to preserve behavioral
-and migration traceability; they are not Azure resource names.
