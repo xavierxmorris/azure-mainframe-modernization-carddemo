@@ -1,0 +1,51 @@
+@page
+@model CardDemo.Modern.Pages.Accounts.IndexModel
+@{
+    ViewData["Title"] = "Accounts";
+}
+
+<section class="page-intro">
+    <p class="eyebrow">VSAM account view / modern seam</p>
+    <h1>Accounts</h1>
+    <p>Search public synthetic records by account ID. Results are assembled from account, card, cross-reference, customer, and transaction files.</p>
+    <p class="demo-notice">This explorer is pseudonymized and unauthenticated. It does not reproduce CICS or RACF authorization behavior.</p>
+</section>
+
+<form class="search-bar" method="get">
+    <label for="query">Find an account</label>
+    <div>
+        <input id="query" name="query" value="@Model.Query" placeholder="Full or partial account ID"
+               inputmode="numeric" pattern="[0-9]*" maxlength="11"
+               aria-describedby="query-help" />
+        <button class="button button-primary" type="submit">Search records</button>
+    </div>
+    <p id="query-help" class="sr-only">Enter up to 11 digits of an account identifier.</p>
+    @if (Model.ValidationMessage is not null)
+    {
+        <p class="demo-notice" role="alert">@Model.ValidationMessage</p>
+    }
+</form>
+
+<div class="table-shell">
+    <table class="accounts-table">
+        <thead><tr><th>Account</th><th>Reference</th><th>Status</th><th>Balance</th><th>Credit limit</th><th>Activity</th><th><span class="sr-only">Open</span></th></tr></thead>
+        <tbody>
+        @foreach (var account in Model.Accounts)
+        {
+            <tr>
+                <td class="account-id" data-label="Account">@account.Id</td>
+                <td data-label="Reference">@account.CardholderLabel</td>
+                <td data-label="Status"><span class="status @(account.IsActive ? "status-active" : "status-inactive")">@(account.IsActive ? "Active" : "Inactive")</span></td>
+                <td class="money" data-label="Balance">@account.CurrentBalance.ToString("C")</td>
+                <td class="money" data-label="Credit limit">@account.CreditLimit.ToString("C")</td>
+                <td data-label="Activity">@account.CardCount cards / @account.TransactionCount txns</td>
+                <td><a class="table-link" asp-page="/Accounts/Detail" asp-route-id="@account.Id">Inspect <span aria-hidden="true">→</span></a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="empty-state"><strong>No matching records.</strong><span>Try a full or partial account ID.</span></div>
+    }
+</div>

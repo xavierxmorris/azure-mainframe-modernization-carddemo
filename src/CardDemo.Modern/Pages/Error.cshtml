@@ -1,0 +1,16 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = Model.HttpStatusCode == 404 ? "Not found" : "Error";
+}
+
+<section class="error-panel">
+    <p class="eyebrow">@(Model.HttpStatusCode?.ToString() ?? "Runtime") / safe failure</p>
+    <h1>@Model.Heading</h1>
+    <p>@Model.Message</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="request-id"><strong>Request ID</strong><code>@Model.RequestId</code></p>
+    }
+    <a class="button button-primary" asp-page="/Index">Return to cockpit</a>
+</section>

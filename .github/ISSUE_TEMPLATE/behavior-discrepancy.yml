@@ -1,0 +1,34 @@
+name: Legacy/modern behavior discrepancy
+description: Report a reproducible difference between a CardDemo legacy artifact and the modern slice.
+title: "[parity] "
+labels: ["parity"]
+body:
+  - type: input
+    id: entry-point
+    attributes:
+      label: Entry point
+      description: CICS transaction, program, JCL job, API route, or UI path.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Legacy evidence
+      description: Cite the relevant paths, paragraphs, copybooks, records, or job steps.
+    validations:
+      required: true
+  - type: textarea
+    id: difference
+    attributes:
+      label: Observed difference
+      description: Include deterministic inputs, legacy result, and modern result.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data safety
+      options:
+        - label: I removed real credentials and personal/payment data from this report.
+          required: true
+

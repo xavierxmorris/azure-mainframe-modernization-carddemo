@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Azure modernization reference implementation for the CardDemo mainframe application." />
+    <title>@ViewData["Title"] · CardDemo Azure</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/CardDemo.Modern.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="column-ruler" aria-hidden="true">
+        <span>01</span><i></i><span>10</span><i></i><span>20</span><i></i><span>30</span><i></i><span>40</span><i></i><span>50</span><i></i><span>60</span><i></i><span>70</span><i></i><span>80</span>
+    </div>
+    <header class="site-header">
+        <nav>
+            <a class="brand" asp-page="/Index"><span>CD</span><strong>CardDemo</strong><small>Azure modernization lab</small></a>
+            <div class="nav-links">
+                <a asp-page="/Index">Cockpit</a>
+                <a asp-page="/Accounts/Index">Accounts</a>
+                <a href="/api/summary">API</a>
+                <a href="https://github.com/xavierxmorris" rel="noreferrer">GitHub</a>
+            </div>
+        </nav>
+    </header>
+    <main id="main">@RenderBody()</main>
+
+    <footer class="site-footer">
+        <span>Reference implementation · read-only sample data</span>
+        <span>ASP.NET Core 10 · Azure Container Apps</span>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

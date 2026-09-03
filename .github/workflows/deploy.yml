@@ -1,0 +1,61 @@
+name: Deploy Azure demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Azure Developer CLI environment name
+        required: true
+        default: carddemo-xm-dev
+      location:
+        description: Azure region
+        required: true
+        default: australiaeast
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: carddemo-azure-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: azure-demo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Validate source and container
+        shell: pwsh
+        run: ./scripts/validate-modern.ps1
+
+      - name: Azure login with OIDC
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision, deploy, and smoke test
+        shell: pwsh
+        env:
+          CARDDEMO_ENVIRONMENT_NAME: ${{ inputs.environment }}
+          CARDDEMO_LOCATION: ${{ inputs.location }}
+          CARDDEMO_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        run: >
+          ./scripts/deploy-azure.ps1
+          -EnvironmentName $env:CARDDEMO_ENVIRONMENT_NAME
+          -Location $env:CARDDEMO_LOCATION
+          -SubscriptionId $env:CARDDEMO_SUBSCRIPTION_ID

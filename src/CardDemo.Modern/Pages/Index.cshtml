@@ -1,0 +1,65 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Migration cockpit";
+}
+
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">CardDemo / Azure reference slice</p>
+        <h1>Read the old system.<br><span>Change it with evidence.</span></h1>
+        <p class="hero-lede">
+            A copybook-derived, read-only explorer over selected CardDemo sample records.
+            The mainframe assets remain intact while this modern seam makes data contracts
+            visible and testable without claiming CICS transaction parity.
+        </p>
+        <div class="hero-actions">
+            <a class="button button-primary" asp-page="/Accounts/Index">Inspect accounts</a>
+            <a class="button button-secondary" href="/api/summary">Open summary API</a>
+        </div>
+    </div>
+    <div class="migration-track" aria-label="Modernization path">
+        <div class="track-node is-source"><span>01</span><strong>COBOL</strong><small>business rules</small></div>
+        <div class="track-line"><i></i></div>
+        <div class="track-node is-active"><span>02</span><strong>SEAM</strong><small>tested API</small></div>
+        <div class="track-line"><i></i></div>
+        <div class="track-node"><span>03</span><strong>AZURE</strong><small>managed runtime</small></div>
+    </div>
+</section>
+
+<section class="metric-grid" aria-label="Loaded legacy data">
+    <article class="metric"><span>Accounts</span><strong>@Model.Summary.AccountCount</strong><small>@Model.Summary.ActiveAccountCount active</small></article>
+    <article class="metric"><span>Cards</span><strong>@Model.Summary.CardCount</strong><small>numbers masked</small></article>
+    <article class="metric"><span>Customers</span><strong>@Model.Summary.CustomerCount</strong><small>private fields omitted</small></article>
+    <article class="metric"><span>Transactions</span><strong>@Model.Summary.TransactionCount</strong><small>daily-file records</small></article>
+</section>
+
+<section class="content-grid">
+    <div>
+        <div class="section-heading">
+            <div><p class="eyebrow">Highest balances</p><h2>Accounts requiring context</h2></div>
+            <a asp-page="/Accounts/Index">View all</a>
+        </div>
+        <div class="account-stack">
+            @foreach (var account in Model.Accounts)
+            {
+                <a class="account-row" asp-page="/Accounts/Detail" asp-route-id="@account.Id">
+                    <span class="account-id">@account.Id</span>
+                    <span><strong>@account.CardholderLabel</strong><small>@account.CardCount cards / @account.TransactionCount transactions</small></span>
+                    <span class="money">@account.CurrentBalance.ToString("C")</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </a>
+            }
+        </div>
+    </div>
+    <aside class="boundary-card">
+        <p class="eyebrow">Modernization boundary</p>
+        <h2>What this slice proves</h2>
+        <dl>
+            <div><dt>Preserved</dt><dd>Original COBOL, JCL, BMS, copybooks, and sample data</dd></div>
+            <div><dt>Exposed</dt><dd>A pseudonymized explorer over public synthetic records; CICS parity is not claimed</dd></div>
+            <div><dt>Protected</dt><dd>CVV, SSN, and government ID are never parsed; card numbers stay internal and are only shown masked</dd></div>
+            <div><dt>Next</dt><dd>External state, Entra ID, Service Bus, and scheduled jobs</dd></div>
+        </dl>
+    </aside>
+</section>

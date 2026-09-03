@@ -6,3 +6,10 @@ batch-app/markers/*
 /.idea/
 .DS_Store
 **/.DS_Store
+**/bin/
+**/obj/
+.azure/
+infra/main.json
+TestResults/
+*.user
+*.suo

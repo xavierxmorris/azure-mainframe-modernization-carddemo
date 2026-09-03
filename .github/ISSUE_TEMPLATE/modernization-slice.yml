@@ -1,0 +1,34 @@
+name: Modernization slice
+description: Propose one bounded transaction, inquiry, or batch outcome to modernize.
+title: "[slice] "
+labels: ["modernization"]
+body:
+  - type: input
+    id: outcome
+    attributes:
+      label: Observable outcome
+      description: One user or operator outcome, not a platform-wide rewrite.
+    validations:
+      required: true
+  - type: textarea
+    id: entry-points
+    attributes:
+      label: Known legacy entry points
+      description: Transactions, programs, jobs, copybooks, files, tables, or queues.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance evidence
+      description: Outputs, balances, statuses, messages, or side effects that prove parity.
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: Explicitly exclude adjacent behavior.
+    validations:
+      required: true
+

@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: tests/CardDemo.Modern.Tests/packages.lock.json
+
+      - name: Restore
+        run: dotnet restore CardDemo.Azure.slnx --locked-mode
+
+      - name: Verify preserved mainframe corpus
+        run: git diff --exit-code --diff-filter=MDRT 59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e -- app samples diagrams scripts
+
+      - name: Verify formatting
+        run: dotnet format CardDemo.Azure.slnx --verify-no-changes --no-restore
+
+      - name: Test
+        run: dotnet test CardDemo.Azure.slnx --configuration Release --no-restore
+
+      - name: Validate Bicep
+        run: az bicep build --file infra/main.bicep
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          load: true
+          push: false
+          tags: carddemo-azure:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test image
+        shell: pwsh
+        run: |
+          $containerId = docker run --rm --detach --publish 18080:8080 carddemo-azure:ci
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              try {
+                Invoke-WebRequest http://localhost:18080/health -UseBasicParsing -TimeoutSec 2 | Out-Null
+                $ready = $true
+                break
+              }
+              catch {
+                Start-Sleep -Seconds 1
+              }
+            }
+            if (-not $ready) {
+              docker logs $containerId
+              throw 'Container did not become healthy.'
+            }
+            ./scripts/smoke-test.ps1 -BaseUrl http://localhost:18080
+          }
+          finally {
+            docker stop $containerId | Out-Null
+          }
+
+      - name: Scan image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: carddemo-azure:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH

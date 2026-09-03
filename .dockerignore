@@ -1,0 +1,9 @@
+**
+!CardDemo.Azure.slnx
+!Directory.Build.props
+!global.json
+!src/CardDemo.Modern/**
+!app/data/ASCII/**
+src/CardDemo.Modern/bin/
+src/CardDemo.Modern/obj/
+**/.DS_Store

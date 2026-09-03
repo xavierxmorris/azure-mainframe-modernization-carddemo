@@ -1,0 +1,76 @@
+@page "/Accounts/{id}"
+@model CardDemo.Modern.Pages.Accounts.DetailModel
+@{
+    ViewData["Title"] = $"Account {Model.Account.Account.Id}";
+}
+
+<a class="back-link" asp-page="/Accounts/Index">← All accounts</a>
+<section class="detail-hero">
+    <div>
+        <p class="eyebrow">Account record</p>
+        <h1>@Model.Account.Account.Id</h1>
+        <p>@Model.Account.Account.CardholderLabel</p>
+    </div>
+    <span class="status @(Model.Account.Account.IsActive ? "status-active" : "status-inactive")">
+        @(Model.Account.Account.IsActive ? "Active" : "Inactive")
+    </span>
+</section>
+
+<section class="detail-metrics">
+    <article><span>Current balance</span><strong>@Model.Account.Account.CurrentBalance.ToString("C")</strong></article>
+    <article><span>Credit limit</span><strong>@Model.Account.Account.CreditLimit.ToString("C")</strong></article>
+    <article><span>Cash credit limit</span><strong>@Model.Account.Account.CashCreditLimit.ToString("C")</strong></article>
+</section>
+
+<p class="demo-notice">Public synthetic data only. Customer names, contact details, card expiry, CVV, SSN, and government identifiers are not exposed.</p>
+
+<section class="detail-grid">
+    <div class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Linked records</p><h2>Cardholders</h2></div></div>
+        @foreach (var customer in Model.Account.Customers)
+        {
+            <article class="person-card">
+                <div class="avatar" aria-hidden="true">S</div>
+                <div><strong>@customer.DisplayLabel</strong><span>@customer.Location</span></div>
+                @if (customer.IsPrimaryCardHolder) { <em>Primary</em> }
+            </article>
+        }
+    </div>
+    <div class="panel">
+        <div class="section-heading"><div><p class="eyebrow">Protected view</p><h2>Cards</h2></div></div>
+        @foreach (var card in Model.Account.Cards)
+        {
+            <article class="card-record">
+                <span class="chip" aria-hidden="true"></span>
+                <strong>@card.MaskedNumber</strong>
+                <span>@card.CardholderLabel</span>
+                <small>Synthetic demo card</small>
+            </article>
+        }
+    </div>
+</section>
+
+<section>
+    <div class="section-heading">
+        <div><p class="eyebrow">Daily transaction file</p><h2>Transaction history</h2></div>
+        <span>@Model.Account.Transactions.Count records</span>
+    </div>
+    <div class="table-shell">
+        <table>
+            <thead><tr><th>Timestamp</th><th>Description</th><th>Merchant</th><th>Source</th><th>Type</th><th>Amount</th></tr></thead>
+            <tbody>
+            @foreach (var transaction in Model.Account.Transactions)
+            {
+                <tr>
+                    <td>@(transaction.OriginalTimestamp?.ToString("dd MMM yyyy") ?? "Unknown")</td>
+                    <td>@transaction.Description</td>
+                    <td>@transaction.MerchantName<span class="cell-subtle">@transaction.MerchantCity</span></td>
+                    <td>@transaction.Source</td>
+                    <td>@transaction.TypeCode / @transaction.CategoryCode</td>
+                    <td class="money">@transaction.Amount.ToString("C")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
