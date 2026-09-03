@@ -2,15 +2,20 @@
 
 [![CI](https://github.com/xavierxmorris/azure-mainframe-modernization-carddemo/actions/workflows/ci.yml/badge.svg)](https://github.com/xavierxmorris/azure-mainframe-modernization-carddemo/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/xavierxmorris/azure-mainframe-modernization-carddemo/actions/workflows/codeql.yml/badge.svg)](https://github.com/xavierxmorris/azure-mainframe-modernization-carddemo/actions/workflows/codeql.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512bd4.svg)](https://dotnet.microsoft.com/)
 [![Azure](https://img.shields.io/badge/Azure-Container%20Apps-0078d4.svg)](https://learn.microsoft.com/azure/container-apps/)
 
-An Azure-ready, AI-ready modernization of the
-[AWS CardDemo sample](https://github.com/aws-samples/aws-mainframe-modernization-carddemo).
-It preserves the original COBOL, CICS, BMS, JCL, VSAM, Db2, IMS, MQ, scheduler,
-and sample-data assets while adding a tested ASP.NET Core reference slice,
-repeatable Azure deployment, and modern GitHub Copilot workflows.
+<!--
+Provenance: this repository is derived from the CardDemo mainframe sample at
+upstream commit 59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e. The Apache License 2.0
+and the original copyright notices are retained in LICENSE and NOTICE.
+-->
+
+An Azure-ready, AI-ready modernization lab built on a COBOL/CICS mainframe
+credit-card sample. It preserves the original COBOL, CICS, BMS, JCL, VSAM, Db2,
+IMS, MQ, scheduler, and sample-data assets while adding a tested ASP.NET Core
+reference slice, repeatable Azure deployment, and modern GitHub Copilot
+workflows.
 
 **Live Azure demo:**
 <https://ca-carddemo-xm-dev-5gp7yl.jollysmoke-f0a69d38.australiaeast.azurecontainerapps.io>
