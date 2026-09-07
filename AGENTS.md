@@ -14,6 +14,11 @@ measurable Azure seams. Do not perform a blind line-by-line translation.
 4. State the legacy invariant being preserved and add a characterization test.
 5. Run `.\scripts\validate-modern.ps1` before completing a change.
 
+For the optional Java example or shared numeric fixtures, also read
+`docs/java-dotnet-modernization.md` and run `.\scripts\check-java-contract.ps1`
+with JDK 25. The .NET gate consumes the same fixtures. This is numeric boundary
+coverage, not evidence that CICS transactions have been reimplemented.
+
 ## Hard boundaries
 
 - Do not modify legacy source merely to make the modern implementation easier.
@@ -32,4 +37,3 @@ dotnet format .\CardDemo.Azure.slnx --verify-no-changes --no-restore
 az bicep build --file .\infra\main.bicep
 docker build --tag carddemo-azure:local .
 ```
-

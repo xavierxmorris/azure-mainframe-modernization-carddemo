@@ -23,4 +23,9 @@
     <ProjectReference Include="..\..\src\CardDemo.Modern\CardDemo.Modern.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\examples\contracts\signed-overpunch.txt"
+          Link="Fixtures\signed-overpunch.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

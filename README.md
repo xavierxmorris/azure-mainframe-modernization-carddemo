@@ -17,6 +17,10 @@ IMS, MQ, scheduler, and sample-data assets while adding a tested ASP.NET Core
 reference slice, repeatable Azure deployment, and modern GitHub Copilot
 workflows.
 
+**Java and .NET upgrade path:** [recommended setup, staged migration, and runnable examples](docs/java-dotnet-modernization.md).
+The existing .NET 10 application remains the primary slice; a dependency-free
+Java 25 example now checks the same synthetic signed-overpunch contract.
+
 **Live Azure demo:**
 <https://ca-carddemo-xm-dev-5gp7yl.jollysmoke-f0a69d38.australiaeast.azurecontainerapps.io>
 (the first request can be slower because the demo scales to zero).
@@ -141,6 +145,7 @@ Jobs or Durable Functions, and RACF-style sign-in with Microsoft Entra ID.
 | `scripts/*.sh` | Original mainframe helper scripts |
 | `src/CardDemo.Modern/` | ASP.NET Core 10 reference application |
 | `tests/CardDemo.Modern.Tests/` | Parser, masking, linking, and summary tests |
+| `examples/java/`, `examples/contracts/` | Java numeric example and shared Java/.NET synthetic contract |
 | `infra/` | Azure subscription/resource-group Bicep |
 | `.github/` | CI, security, Copilot customizations, templates, and dependency updates |
 | `docs/` | Assessment, decisions, target mappings, Copilot playbook, and backlog |

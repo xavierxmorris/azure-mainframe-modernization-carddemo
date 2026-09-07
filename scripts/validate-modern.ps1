@@ -49,6 +49,7 @@ try {
                 -BaseUrl "http://127.0.0.1:$port" `
                 -Attempts 30 `
                 -DelaySeconds 1
+            & "$PSScriptRoot\test-http-contract.ps1" -BaseUrl "http://127.0.0.1:$port"
 
             $containerUser = docker inspect $containerId --format '{{.Config.User}}'
             $platform = docker image inspect $image --format '{{.Os}}/{{.Architecture}}'

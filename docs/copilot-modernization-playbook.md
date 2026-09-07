@@ -2,6 +2,11 @@
 
 Last reviewed: 2026-09-03
 
+For the **7 September 2026 Java/.NET extension**, see
+[target selection, setup, and shared numeric examples](java-dotnet-modernization.md).
+It preserves this playbook's read-only scope and separates supported framework
+upgrades from AI-assisted COBOL behavior replacement.
+
 ## Why the repository is agent-ready
 
 Current GitHub Copilot surfaces can share repository instructions, path-specific
@@ -90,4 +95,3 @@ subscription on the assessment date.
 Large language models accelerate inventory, explanation, test generation,
 mapping, and review. They do not replace business-owner validation, production
 data reconciliation, security architecture, or cutover controls.
-

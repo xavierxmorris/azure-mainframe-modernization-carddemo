@@ -40,6 +40,21 @@ jobs:
       - name: Validate Bicep
         run: az bicep build --file infra/main.bicep
 
+  java-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Java
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Match the same signed-overpunch contract used by .NET
+        shell: pwsh
+        run: ./scripts/check-java-contract.ps1
+
   container:
     runs-on: ubuntu-latest
     steps:
@@ -50,6 +65,11 @@ jobs:
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Set up .NET for black-box HTTP contract checks
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
 
       - name: Build image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
@@ -82,6 +102,7 @@ jobs:
               throw 'Container did not become healthy.'
             }
             ./scripts/smoke-test.ps1 -BaseUrl http://localhost:18080
+            ./scripts/test-http-contract.ps1 -BaseUrl http://localhost:18080
           }
           finally {
             docker stop $containerId | Out-Null

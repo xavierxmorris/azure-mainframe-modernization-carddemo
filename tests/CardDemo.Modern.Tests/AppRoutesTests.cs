@@ -2,12 +2,13 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using CardDemo.Modern.Models;
+using CardDemo.Modern.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CardDemo.Modern.Tests;
 
-public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private static readonly HashSet<string> ForbiddenJsonProperties = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -25,14 +26,16 @@ public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program
 
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
+    private readonly Uri? _liveTarget;
 
     public AppRoutesTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
-        _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        _liveTarget = ReadLiveTarget();
+        _client = _liveTarget is null ? factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false
-        });
+        }) : CreateLiveClient(_liveTarget);
     }
 
     [Fact]
@@ -43,6 +46,7 @@ public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program
         Assert.NotNull(summary);
         Assert.Equal(50, summary.AccountCount);
         Assert.Equal(300, summary.TransactionCount);
+        Assert.Equal(new LegacyDataStore().Summary, summary);
     }
 
     [Fact]
@@ -109,13 +113,52 @@ public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program
     [Fact]
     public async Task ProductionResponse_HasHsts()
     {
-        using var client = _factory
+        using var client = _liveTarget is not null ? CreateLiveClient(_liveTarget) : _factory
             .WithWebHostBuilder(builder => builder.UseEnvironment("Production"))
             .CreateClient();
 
         var response = await client.GetAsync("/");
 
         Assert.True(response.Headers.Contains("Strict-Transport-Security"));
+    }
+
+    [Fact]
+    public async Task EveryAccount_MatchesTheLocalReadOnlyReference()
+    {
+        var reference = new LegacyDataStore();
+        var expectedList = reference.SearchAccounts();
+        Assert.Equal(50, expectedList.Count);
+        var actualList = await _client.GetFromJsonAsync<AccountListItem[]>("/api/accounts");
+        Assert.NotNull(actualList);
+        Assert.Equal(expectedList, actualList);
+
+        var rawCards = File.ReadLines(Path.Combine(AppContext.BaseDirectory, "Data", "carddata.txt"))
+            .Select(line => line[..16]).ToArray();
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var transactionCount = 0;
+        foreach (var item in expectedList)
+        {
+            var response = await _client.GetAsync($"/api/accounts/{item.Id}");
+            response.EnsureSuccessStatusCode();
+            var body = await response.Content.ReadAsStringAsync();
+            using var json = JsonDocument.Parse(body);
+            Assert.False(ContainsForbiddenProperty(json.RootElement), "A detail exposed a forbidden property.");
+            Assert.False(rawCards.Any(card => body.Contains(card, StringComparison.Ordinal)),
+                "A detail exposed a raw card number.");
+
+            var actual = JsonSerializer.Deserialize<AccountDetail>(body, jsonOptions);
+            var expected = reference.GetAccount(item.Id);
+            Assert.NotNull(actual);
+            Assert.NotNull(expected);
+            Assert.Equal(expected.Account, actual.Account);
+            Assert.Equal(expected.Cards, actual.Cards);
+            Assert.Equal(expected.Customers, actual.Customers);
+            Assert.Equal(expected.Transactions, actual.Transactions);
+            Assert.Equal(item.CardCount, actual.Cards.Count);
+            Assert.Equal(item.TransactionCount, actual.Transactions.Count);
+            transactionCount += actual.Transactions.Count;
+        }
+        Assert.Equal(reference.Summary.TransactionCount, transactionCount);
     }
 
     [Fact]
@@ -224,4 +267,34 @@ public sealed class AppRoutesTests : IClassFixture<WebApplicationFactory<Program
                 customer.Substring(59, 25).Trim()
             }.Where(value => value.Length > 0));
     }
+
+    private static Uri? ReadLiveTarget()
+    {
+        var configured = Environment.GetEnvironmentVariable("CARDDEMO_TEST_BASE_URL");
+        if (configured is null)
+        {
+            return null;
+        }
+        if (!Uri.TryCreate(configured, UriKind.Absolute, out var uri)
+            || !(uri.Scheme == Uri.UriSchemeHttps || (uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback))
+            || uri.UserInfo.Length != 0 || uri.Query.Length != 0 || uri.Fragment.Length != 0
+            || uri.AbsolutePath != "/")
+        {
+            throw new InvalidOperationException(
+                "CARDDEMO_TEST_BASE_URL must be an HTTPS origin or loopback HTTP origin, without credentials.");
+        }
+        return uri;
+    }
+
+    private static HttpClient CreateLiveClient(Uri target) => new(new HttpClientHandler
+    {
+        AllowAutoRedirect = false
+    })
+    {
+        BaseAddress = target,
+        Timeout = TimeSpan.FromSeconds(30),
+        MaxResponseContentBufferSize = 2 * 1024 * 1024
+    };
+
+    public void Dispose() => _client.Dispose();
 }
