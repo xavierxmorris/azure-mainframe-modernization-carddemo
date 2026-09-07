@@ -11,11 +11,16 @@ upstream commit 59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e. The Apache License 2.0
 and the original copyright notices are retained in LICENSE and NOTICE.
 -->
 
-An Azure-ready, AI-ready modernization lab built on a COBOL/CICS mainframe
+An evidence-driven modernization lab built on a COBOL/CICS mainframe
 credit-card sample. It preserves the original COBOL, CICS, BMS, JCL, VSAM, Db2,
 IMS, MQ, scheduler, and sample-data assets while adding a tested ASP.NET Core
 reference slice, repeatable Azure deployment, and modern GitHub Copilot
 workflows.
+
+[Run locally](#run-locally) · [Java/.NET path](docs/java-dotnet-modernization.md) ·
+[Copilot value](#github-copilot-modernization-workflow) ·
+[Architecture](#architecture) · [Repository map](#repository-map) ·
+[Deployment](#deploy-to-azure)
 
 **Java and .NET upgrade path:** [recommended setup, staged migration, and runnable examples](docs/java-dotnet-modernization.md).
 The existing .NET 10 application remains the primary slice; a dependency-free
@@ -73,12 +78,17 @@ Open the URL printed by ASP.NET Core. Useful routes:
 | `/api/accounts/{id}` | Pseudonymized, masked account detail API |
 | `/health` | Container readiness/liveness endpoint |
 
-To run the exact production image locally:
+To build and run the repository's production Dockerfile locally:
 
 ```powershell
 docker build --tag carddemo-azure:local .
 docker run --rm --publish 8080:8080 carddemo-azure:local
-.\scripts\smoke-test.ps1 -BaseUrl http://localhost:8080
+```
+
+In another terminal, run the read-only HTTP contract against that container:
+
+```powershell
+.\scripts\test-http-contract.ps1 -BaseUrl http://localhost:8080
 ```
 
 ## Deploy to Azure
@@ -97,7 +107,9 @@ az login
 .\scripts\deploy-azure.ps1 -EnvironmentName carddemo-xm-dev -Location australiaeast
 ```
 
-Equivalent direct Azure Developer CLI flow:
+An alternative Azure Developer CLI entry point is shown below. Review its
+environment and the deployment guidance before use; it is not the local
+validation command:
 
 ```powershell
 azd env new carddemo-xm-dev
@@ -105,10 +117,11 @@ azd env set AZURE_LOCATION australiaeast
 azd up
 ```
 
-Remove the demo resources when they are no longer required:
+Remove demo resources only after confirming the environment and what will be
+deleted. This is a destructive operation, not part of local validation:
 
 ```powershell
-azd down --purge --force
+azd down
 ```
 
 See [Azure migration assessment](docs/azure-migration-assessment.md) for the
@@ -132,9 +145,10 @@ flowchart LR
     J -->|managed identity pull| G
 ```
 
-Future production phases replace immutable seed files with Azure SQL or
-PostgreSQL, IBM MQ with Azure Service Bus, JCL schedules with Container Apps
-Jobs or Durable Functions, and RACF-style sign-in with Microsoft Entra ID.
+Potential production phases include external state, messaging, job orchestration,
+and Microsoft Entra ID. These require approved contracts and failure/security
+semantics; they are not mechanical one-for-one replacements for VSAM, MQ,
+JCL, or RACF behavior.
 
 ## Repository map
 
@@ -151,6 +165,16 @@ Jobs or Durable Functions, and RACF-style sign-in with Microsoft Entra ID.
 | `docs/` | Assessment, decisions, target mappings, Copilot playbook, and backlog |
 
 ## GitHub Copilot modernization workflow
+
+Copilot's role is to assist engineering, not to certify mainframe equivalence
+or production readiness:
+
+| Engineering task | Copilot contribution | Acceptance evidence |
+| --- | --- | --- |
+| Understand the legacy boundary | Help trace programs, copybooks, record layouts, and dependencies | Source references and explicit unknowns |
+| Implement a read-only slice | Help draft parser/domain/UI changes under the repository constraints | Copybook, masking, linking, and HTTP contracts |
+| Develop delivery assets | Help maintain Docker, Bicep, and CI changes | Builds, previews, scoped infrastructure review, and runtime checks |
+| Review the result | Help locate unproven assumptions and unexplained differences | Engineer/domain-owner decisions, not an AI confidence score |
 
 This repository uses the current customization layers for different kinds of
 context instead of one oversized prompt:
@@ -173,7 +197,10 @@ trace legacy entry point -> extract invariants -> write characterization tests
 -> observe -> decide the next transaction
 ```
 
-See [Copilot modernization playbook](docs/copilot-modernization-playbook.md).
+See the [Copilot modernization playbook](docs/copilot-modernization-playbook.md)
+for this repository and the shared
+[Copilot value guide](https://github.com/xavierxmorris/ghcp-demo-13-modernize-legacy-cobol-app/blob/main/docs/COPILOT-VALUE.md)
+for how the three modernization labs fit together.
 
 ## Security and data handling
 
